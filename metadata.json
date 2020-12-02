@@ -1,0 +1,9 @@
+{
+	"name":"GolemAlert",
+	"author": "joker876",
+	"description": "Adds an alert an a timer for when the Endstone Protector is about to spawn.",
+	"helpMessage": "&cType &a&l/golem &r&cto open settings.",
+	"version": "1.0.0",
+	"requires": [ "SettingsManager" ],
+	"entry": "index.js"
+}
