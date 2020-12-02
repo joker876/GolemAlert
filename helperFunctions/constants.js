@@ -21,3 +21,10 @@ export const colors = {
     '&eYellow': '&e',
     '&fWhite': '&f',
 }
+
+export const sounds = {
+    'None': null,
+    'Golem death': 'mob.irongolem.death',
+    'Golem damaged': 'mob.irongolem.hit',
+    'Custom': null,
+}
