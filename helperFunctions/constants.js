@@ -1,6 +1,6 @@
 export const dataFileStructure = {
-    x: 5,
-    y: 5,
+    x: 5,//Renderer.screen.getWidth()/2,
+    y: 15,
 }
 
 export const colors = {
@@ -26,5 +26,5 @@ export const sounds = {
     'None': null,
     'Golem death': 'mob.irongolem.death',
     'Golem damaged': 'mob.irongolem.hit',
-    'Custom': null,
+    'Custom': 'custom',
 }

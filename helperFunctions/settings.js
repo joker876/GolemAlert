@@ -24,10 +24,11 @@ export default function initiateSettings() {
         name: 'Settings',
         settings: [
             new Setting.Button("Click here to move the GUI >>>", "&e&lCLICK!", () => { ChatLib.command('golem gui', true) }),
-            new Setting.Slider('Scale &8in %', 100, 1, 300),
+            new Setting.Slider('Scale &8in %', 150, 1, 400),
             new Setting.StringSelector('Sound', 1, Object.keys(sounds)),
+            new Setting.Button("Click here to test the sound >>>", "&e&lCLICK!", () => { ChatLib.command('golem testsound', true) }),
             new Setting.StringSelector('Main color', 15, Object.keys(colors)),
-            new Setting.StringSelector('Sub color', 15, Object.keys(colors)),
+            new Setting.StringSelector('Timer color', 12, Object.keys(colors)),
         ],
     },
     ]).setCommand('golemalert').setSize(450, 200);
