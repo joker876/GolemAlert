@@ -1,11 +1,12 @@
 import { dataFileStructure, sounds, colors } from './helperFunctions/constants'
 
-let data = JSON.parse(FileLib.read('golemalert', './data.json'));
-if (!data) {
+global.golemalert = {};
+
+global.golemalert.data = JSON.parse(FileLib.read('golemalert', './data.json'));
+if (!global.golemalert.data) {
     FileLib.write('golemalert', './data.json', JSON.stringify(dataFileStructure));
-    data = JSON.parse(FileLib.read('golemalert', './data.json'));
+    global.golemalert.data = JSON.parse(FileLib.read('golemalert', './data.json'));
 }
-global.golemalert = { data };
 
 global.golemalert.metadata = JSON.parse(FileLib.read('golemalert', './metadata.json'));
 
@@ -32,7 +33,6 @@ register('command', commandHandler).setName('golem');
 import makeTimer from './helperFunctions/timer';
 let targetTimestamp = null;
 register('chat', (message) => {
-    console.log(message);
     if (!message.match(/The ground begins to shake as an Endstone Protector rises from below!/)) return;
     targetTimestamp = Math.floor(Date.now() / 1000) + 20
 
@@ -40,7 +40,7 @@ register('chat', (message) => {
 }).setCriteria('${message}')
 
 register('step', () => {
-    FileLib.write('golemalert', './data.json', JSON.stringify(data));
+    if (!global.golemalert.stopData) FileLib.write('golemalert', './data.json', JSON.stringify(global.golemalert.data));
 }).setDelay(1)
 
 register('tick', () => {
@@ -52,28 +52,34 @@ register('tick', () => {
     //update scale
     global.golemalert.scale = global.golemalert.settings.getSetting('Settings', 'Scale &8in %') / 100;
     
-    
-    if(!global.golemalert.gui.isOpen()) {
-        targetTimestamp = null;
-        global.golemalert.display.clearLines();
-        global.golemalert.display.setShouldRender(false);
-    }
-    if (!targetTimestamp && !global.golemalert.gui.isOpen()) return;
+    global.golemalert.display.clearLines();
+    global.golemalert.display.setShouldRender(false);
+
+    if (!targetTimestamp && !global.golemalert.gui.isOpen() && !global.golemalert.isTestMode) return;
     
     const currentTimestamp = Math.floor(Date.now() / 1000);
+    const secondsRemaining = (targetTimestamp ?? global.golemalert.testTimestamp)-currentTimestamp
+
+    const showExclamationMark = secondsRemaining % 2 == 1
+
+    const curColor = {
+        main: colors[global.golemalert.settings.getSetting('Settings', 'Main color')],
+        timer: colors[global.golemalert.settings.getSetting('Settings', 'Timer color')]
+    }
 
     if (global.golemalert.gui.isOpen()) {
         global.golemalert.display.setShouldRender(true)
-        global.golemalert.display.setLine(0, new DisplayLine(`${colors[global.golemalert.settings.getSetting('Settings', 'Main color')]}Golem Alert!`).setShadow(true).setScale(global.golemalert.scale + 0.1));
-        global.golemalert.display.setLine(1, new DisplayLine(`${colors[global.golemalert.settings.getSetting('Settings', 'Timer color')]}00:20`).setShadow(true).setScale(global.golemalert.scale));
+        global.golemalert.display.setLine(0, new DisplayLine(`${curColor.main}Golem Alert!`).setShadow(true).setScale(global.golemalert.scale + 0.1));
+        global.golemalert.display.setLine(1, new DisplayLine(`${curColor.timer}00:20`).setShadow(true).setScale(global.golemalert.scale));
     }
-    if (targetTimestamp) {
+    if (targetTimestamp || global.golemalert.isTestMode) {
         global.golemalert.display.setShouldRender(true)
-        global.golemalert.display.setLine(0, new DisplayLine(`${colors[global.golemalert.settings.getSetting('Settings', 'Main color')]}Golem Alert!`).setShadow(true).setScale(global.golemalert.scale + 0.1));
-        global.golemalert.display.setLine(1, new DisplayLine(`${colors[global.golemalert.settings.getSetting('Settings', 'Timer color')]}${makeTimer(targetTimestamp-currentTimestamp)}`).setShadow(true).setScale(global.golemalert.scale));
+        global.golemalert.display.setLine(0, new DisplayLine(`${curColor.main}Golem Alert!`).setShadow(true).setScale(global.golemalert.scale + 0.1));
+        global.golemalert.display.setLine(1, new DisplayLine(`${curColor.timer}${showExclamationMark ? '&l! ' : curColor.timer}${curColor.timer}${makeTimer(secondsRemaining)}${showExclamationMark ? ' &l!' : ''}`).setShadow(true).setScale(global.golemalert.scale));
     }
     
-    if(targetTimestamp + 1 == currentTimestamp) {
+    if(secondsRemaining + 1 == 0) {
+        global.golemalert.isTestMode = false;
         targetTimestamp = null;
         global.golemalert.display.clearLines();
         global.golemalert.display.setShouldRender(false);
